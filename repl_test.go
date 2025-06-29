@@ -26,6 +26,7 @@ func TestCleanInput(t *testing.T) {
 		// Check the length of the actual slice against the expected slice
 		if len(actual) != len(c.expected) {
 			t.Errorf("Expected length %d, got %d for input '%s'", len(c.expected), len(actual), c.input)
+			continue // Skip further checks for this case if lengths don't match
 		}
 		for i := range actual {
 			word := actual[i]
