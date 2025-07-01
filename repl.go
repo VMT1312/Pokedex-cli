@@ -13,19 +13,48 @@ type cliCommand struct {
 	callback    func() error
 }
 
+type config struct {
+	Next     *string
+	Previous *string
+}
+
 func startRepl() {
 	var err error
+
+	firstPage := "https://pokeapi.co/api/v2/location-area/"
+	var c config
+	c.Next = &firstPage
+	c.Previous = nil
 
 	commands := map[string]cliCommand{
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
-			callback:    commandExit,
+			callback: func() error {
+				return commandExit(&c)
+			},
 		},
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			callback:    commandHelp,
+			callback: func() error {
+				return commandHelp(&c)
+			},
+		},
+		"map": {
+			name:        "map",
+			description: "Displays the region in Pokemon",
+			callback: func() error {
+				return commandMap(&c)
+
+			},
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous page of the region in Pokemon",
+			callback: func() error {
+				return commandMapb(&c)
+			},
 		},
 	}
 
