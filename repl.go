@@ -5,61 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/VMT1312/pokedexcli/internal/pokeapi"
 )
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func() error
-}
-
 type config struct {
-	Next     *string
-	Previous *string
+	Next       *string
+	Previous   *string
+	pokeClient pokeapi.Client
 }
 
-func startRepl() {
-	var err error
-
-	firstPage := "https://pokeapi.co/api/v2/location-area/"
-	var c config
-	c.Next = &firstPage
-	c.Previous = nil
-
-	commands := map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback: func() error {
-				return commandExit(&c)
-			},
-		},
-		"help": {
-			name:        "help",
-			description: "Displays a help message",
-			callback: func() error {
-				return commandHelp(&c)
-			},
-		},
-		"map": {
-			name:        "map",
-			description: "Displays the region in Pokemon",
-			callback: func() error {
-				return commandMap(&c)
-
-			},
-		},
-		"mapb": {
-			name:        "mapb",
-			description: "Displays the previous page of the region in Pokemon",
-			callback: func() error {
-				return commandMapb(&c)
-			},
-		},
-	}
-
+func startRepl(c *config) {
 	scanner := bufio.NewScanner(os.Stdin)
-
 	for {
 		fmt.Print("Pokedex > ")
 
@@ -71,11 +28,11 @@ func startRepl() {
 		text := scanner.Text()
 		words := cleanInput(text)
 
-		command, ok := commands[words[0]]
+		command, ok := getCommands()[words[0]]
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			err = command.callback()
+			err := command.callback(c)
 			if err != nil {
 				fmt.Printf("Error executing command '%s': %v\n", command.name, err)
 				continue
@@ -96,4 +53,35 @@ func cleanInput(text string) []string {
 	words := strings.Fields(lower_case)
 
 	return words
+}
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func(*config) error
+}
+
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+		"mapf": {
+			name:        "mapf",
+			description: "Displays the next page of the region in Pokemon",
+			callback:    commandMapf,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous page of the region in Pokemon",
+			callback:    commandMapb,
+		},
+	}
 }

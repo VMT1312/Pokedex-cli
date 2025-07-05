@@ -1,47 +1,20 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 )
 
-type locationArea struct {
-	Count    int     `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-}
-
-func commandMap(c *config) error {
-	res, err := http.Get(*c.Next)
+func commandMapf(c *config) error {
+	res, err := c.pokeClient.ListLocations(c.Next)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code %d", res.StatusCode)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
+	c.Next = res.Next
+	c.Previous = res.Previous
 
-	var location_area locationArea
-	if err := json.Unmarshal(body, &location_area); err != nil {
-		log.Fatal(err)
-	}
-
-	c.Next = location_area.Next
-	c.Previous = location_area.Previous
-
-	for _, area := range location_area.Results {
+	for _, area := range res.Results {
 		fmt.Println(area.Name)
 	}
 
@@ -50,33 +23,18 @@ func commandMap(c *config) error {
 
 func commandMapb(c *config) error {
 	if c.Previous == nil {
-		fmt.Println("you're on the first page")
-		return nil
+		return errors.New("you're on the first page")
 	}
 
-	res, err := http.Get(*c.Previous)
+	res, err := c.pokeClient.ListLocations(c.Next)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code %d", res.StatusCode)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
+	c.Next = res.Next
+	c.Previous = res.Previous
 
-	var location_area locationArea
-	if err := json.Unmarshal(body, &location_area); err != nil {
-		log.Fatal(err)
-	}
-
-	c.Next = location_area.Next
-	c.Previous = location_area.Previous
-
-	for _, area := range location_area.Results {
+	for _, area := range res.Results {
 		fmt.Println(area.Name)
 	}
 
