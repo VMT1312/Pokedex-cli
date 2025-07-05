@@ -34,7 +34,7 @@ func startRepl(c *config) {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			err := command.callback(c)
+			err := command.callback(words, c)
 			if err != nil {
 				fmt.Printf("Error executing command '%s': %v\n", command.name, err)
 				continue
@@ -60,7 +60,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func([]string, *config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -84,6 +84,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Displays the previous page of the region in Pokemon",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "List all the Pokemons within a region",
+			callback:    commandExplore,
 		},
 	}
 }
