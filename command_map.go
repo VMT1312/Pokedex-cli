@@ -6,7 +6,7 @@ import (
 )
 
 func commandMapf(c *config) error {
-	res, err := c.pokeClient.ListLocations(c.Next)
+	res, err := c.pokeClient.ListLocations(c.Next, c.cache)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func commandMapb(c *config) error {
 		return errors.New("you're on the first page")
 	}
 
-	res, err := c.pokeClient.ListLocations(c.Next)
+	res, err := c.pokeClient.ListLocations(c.Next, c.cache)
 	if err != nil {
 		return err
 	}

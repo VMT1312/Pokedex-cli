@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	"github.com/VMT1312/pokedexcli/internal/pokeapi"
+	"github.com/VMT1312/pokedexcli/internal/pokecache"
 )
 
 type config struct {
 	Next       *string
 	Previous   *string
 	pokeClient pokeapi.Client
+	cache      *pokecache.Cache
 }
 
 func startRepl(c *config) {
